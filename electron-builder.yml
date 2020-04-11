@@ -1,0 +1,51 @@
+appId: com.electron.phpmyadmin-desktop
+productName: phpMyAdmin
+artifactName: phpMyAdmin-${version}-${channel}-${arch}.${ext}
+copyright: Copyright © year nashaofu
+asar: true
+directories:
+  output: release
+files:
+  - dist/**
+  - conf/**
+publish:
+  provider: github
+  owner: nashaofu
+  repo: phpMyAdmin
+mac:
+  target: dmg
+  category: public.app-category.instant-messaging
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - ia32
+        - arm64
+        - armv7l
+    - target: deb
+      arch:
+        - x64
+        - ia32
+        - arm64
+        - armv7l
+    - target: rpm
+      arch:
+        - x64
+        - ia32
+        - arm64
+        - armv7l
+  executableName: phpMyAdmin
+  category: InstantMessaging;Network
+nsis:
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  displayLanguageSelector: true
+  language: 2052
