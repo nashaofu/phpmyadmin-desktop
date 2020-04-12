@@ -6,7 +6,7 @@ const ElectronDevWebpackPlugin = require('electron-dev-webpack-plugin')
 module.exports = merge(webpackConfig, {
   mode: 'development',
   watch: true,
-  devtool: false,
+  devtool: 'source-map',
   plugins: [
     new ElectronDevWebpackPlugin(),
     new FriendlyErrorsPlugin({

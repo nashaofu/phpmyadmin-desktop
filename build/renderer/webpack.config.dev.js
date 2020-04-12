@@ -15,7 +15,7 @@ module.exports = merge(webpackConfig, {
   },
   devtool: 'eval-cheap-source-map',
   devServer: {
-    host: '0.0.0.0',
+    host: 'localhost',
     port: config.port,
     hot: true,
     publicPath: '',

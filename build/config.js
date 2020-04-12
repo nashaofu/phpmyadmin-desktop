@@ -8,9 +8,16 @@ module.exports = {
   context,
   srcDir,
   distDir,
-  entry: {
-    main: path.resolve(srcDir, 'main/index.js'),
-    renderer: path.resolve(srcDir, 'renderer/index.js')
+  main: path.resolve(srcDir, 'main/index.js'),
+  renderer: {
+    app: {
+      entry: path.resolve(srcDir, 'renderer/app/index.js'),
+      template: path.resolve(srcDir, 'renderer/app/index.html')
+    },
+    install: {
+      entry: path.resolve(srcDir, 'renderer/install/index.js'),
+      template: path.resolve(srcDir, 'renderer/install/index.html')
+    }
   },
   port: 8080,
   sourceMap: false

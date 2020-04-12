@@ -11,7 +11,7 @@ module.exports = {
   context: config.context,
   target: 'electron-main',
   entry: {
-    app: config.entry.main
+    app: config.main
   },
   output: {
     path: config.distDir,
@@ -19,7 +19,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      '@': resolve('src/main')
+      '@': resolve('src')
     }
   },
   externals: Object.keys(dependencies).reduce((externals, key) => {

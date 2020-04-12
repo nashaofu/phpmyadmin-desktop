@@ -10,9 +10,10 @@ function resolve (dir) {
 module.exports = {
   context: config.context,
   target: 'electron-renderer',
-  entry: {
-    app: config.entry.renderer
-  },
+  entry: Object.keys(config.renderer).reduce((entry, key) => {
+    entry[key] = config.renderer[key].entry
+    return entry
+  }, {}),
   output: {
     path: path.join(config.distDir, './renderer'),
     filename: 'js/[name].js'
@@ -20,7 +21,7 @@ module.exports = {
   resolve: {
     extensions: ['.wasm', '.mjs', '.js', '.jsx', '.json'],
     alias: {
-      '@': resolve('src/renderer')
+      '@': resolve('src')
     }
   },
   module: {
@@ -68,12 +69,15 @@ module.exports = {
   },
   plugins: [
     new ProgressPlugin(),
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: path.join(config.context, 'src/renderer/index.html'),
-      inject: true,
-      chunksSortMode: 'auto',
-      chunks: ['app']
+    ...Object.keys(config.renderer).map(key => {
+      const template = config.renderer[key].template
+      return new HtmlWebpackPlugin({
+        filename: path.basename(template),
+        template: template,
+        inject: true,
+        chunksSortMode: 'auto',
+        chunks: [key]
+      })
     })
   ]
 }
