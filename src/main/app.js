@@ -1,6 +1,7 @@
 import os from 'os'
 import path from 'path'
 import fs from 'fs-extra'
+import kill from 'tree-kill'
 import detect from 'detect-port'
 import { spawn } from 'child_process'
 import { app, BrowserWindow, ipcMain } from 'electron'
@@ -19,17 +20,25 @@ export default class App {
   }
 
   async init () {
+    app.setAppUserModelId('com.electron.phpmyadmin-desktop')
+
     app.on('window-all-closed', () => {
       app.quit()
-      if (this.phpProcess) {
-        this.phpProcess.kill()
+    })
+
+    app.on('quit', () => {
+      if (this.phpProcess && !this.phpProcess.killed) {
+        kill(this.phpProcess.pid, 'SIGKILL', err => {
+          if (err) {
+            this.phpProcess.kill()
+          }
+        })
       }
     })
+
     ipcMain.on('app-install-complete', () => {
-      if (this.installWin) {
-        this.installWin.close()
-      }
-      this.showMainWin()
+      app.relaunch()
+      app.exit()
     })
     const pathExists = await Promise.all([fs.pathExists(phpDir), fs.pathExists(phpMyAdminDir)])
 
@@ -48,13 +57,13 @@ export default class App {
       center: true,
       resizable: false,
       fullscreenable: false,
-      autoHideMenuBar: true,
       darkTheme: true,
       show: false,
       webPreferences: {
         nodeIntegration: true
       }
     })
+    this.installWin.removeMenu()
 
     this.installWin.on('closed', () => {
       this.installWin = null
@@ -78,15 +87,14 @@ export default class App {
     }
     await app.whenReady()
     this.mainWin = new BrowserWindow({
-      width: 1000,
+      width: 1200,
       height: 800,
       show: false,
       center: true,
-      resizable: false,
       fullscreenable: false,
-      autoHideMenuBar: true,
       darkTheme: true
     })
+
     this.mainWin.on('closed', () => {
       this.mainWin = null
     })
@@ -105,6 +113,10 @@ export default class App {
         stdio: ['inherit', 'inherit', 'inherit']
       }
     )
+
+    this.phpProcess.on('close', () => {
+      this.phpProcess = null
+    })
 
     // 加载远程URL
     const url = `http://127.0.0.1:${this.port}`

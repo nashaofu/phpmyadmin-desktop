@@ -143,15 +143,12 @@ export default class App extends Component {
 
     this.log(`正在解压文件${archiveName}...`)
 
-    await Promise.all([fs.remove(path.join(archivesDir, './php-tmp')), fs.remove(path.join(archivesDir, './php'))])
+    await fs.remove(path.join(archivesDir, './php'))
 
-    await decompress(buffer, path.join(archivesDir, './php-tmp'))
+    await decompress(buffer, path.join(archivesDir, './php'), {
+      strip: isWin32 ? 0 : 1
+    })
 
-    if (isWin32) {
-      await fs.move(path.join(archivesDir, './php-tmp'), path.join(archivesDir, './php'))
-    } else {
-      await fs.move(path.join(archivesDir, './php-tmp/php-7.4.4'), path.join(archivesDir, './php'))
-    }
     await fs.copyFile(path.join(appPath, './conf/php.ini'), path.join(archivesDir, './php/php.ini'))
 
     this.log('解压完成')
@@ -225,18 +222,15 @@ export default class App extends Component {
     const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
+
     this.log(`正在解压文件${archiveName}...`)
 
-    // await Promise.all([
-    //   fs.remove(path.join(archivesDir, './phpMyAdmin-tmp')),
-    //   fs.remove(path.join(archivesDir, './phpMyAdmin'))
-    // ])
+    await fs.remove(path.join(archivesDir, './phpMyAdmin'))
 
-    // await decompress(buffer, path.join(archivesDir, './phpMyAdmin-tmp'))
-    // await fs.move(
-    //   path.join(archivesDir, './phpMyAdmin-tmp/phpMyAdmin-5.0.2-all-languages'),
-    //   path.join(archivesDir, './phpMyAdmin')
-    // )
+    await decompress(buffer, path.join(archivesDir, './phpMyAdmin'), {
+      strip: 1
+    })
+
     await fs.copyFile(
       path.join(appPath, './conf/config.default.php'),
       path.join(archivesDir, './phpMyAdmin/libraries/config.default.php')

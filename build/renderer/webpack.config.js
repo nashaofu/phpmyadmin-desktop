@@ -76,7 +76,7 @@ module.exports = {
     ...Object.keys(config.renderer).map(key => {
       const template = config.renderer[key].template
       return new HtmlWebpackPlugin({
-        filename: path.basename(template),
+        filename: `${key}.html`,
         template: template,
         inject: true,
         chunksSortMode: 'auto',

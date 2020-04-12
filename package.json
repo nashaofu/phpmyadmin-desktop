@@ -36,7 +36,8 @@
     "got": "^10.7.0",
     "log4js": "^6.1.2",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "tree-kill": "^1.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
