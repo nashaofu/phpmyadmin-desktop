@@ -3,7 +3,7 @@ import got from 'got'
 import path from 'path'
 import fs from 'fs-extra'
 import crypto from 'crypto'
-import { remote } from 'electron'
+import { remote, ipcRenderer } from 'electron'
 import decompress from 'decompress'
 import React, { Component } from 'react'
 import { Steps, Divider, Button } from 'antd'
@@ -137,6 +137,7 @@ export default class App extends Component {
   }
 
   async installPHP (archiveName, buffer) {
+    const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
 
@@ -151,8 +152,9 @@ export default class App extends Component {
     } else {
       await fs.move(path.join(archivesDir, './php-tmp/php-7.4.4'), path.join(archivesDir, './php'))
     }
+    await fs.copyFile(path.join(appPath, './conf/php.ini'), path.join(archivesDir, './php/php.ini'))
 
-    this.log('解压完成...')
+    this.log('解压完成')
 
     const { PHP } = this.state
     PHP.status = 'finish'
@@ -220,22 +222,27 @@ export default class App extends Component {
   }
 
   async installPhpMyAdmin (archiveName, buffer) {
+    const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
     this.log(`正在解压文件${archiveName}...`)
 
-    await Promise.all([
-      fs.remove(path.join(archivesDir, './phpMyAdmin-tmp')),
-      fs.remove(path.join(archivesDir, './phpMyAdmin'))
-    ])
+    // await Promise.all([
+    //   fs.remove(path.join(archivesDir, './phpMyAdmin-tmp')),
+    //   fs.remove(path.join(archivesDir, './phpMyAdmin'))
+    // ])
 
-    await decompress(buffer, path.join(archivesDir, './phpMyAdmin-tmp'))
-    await fs.move(
-      path.join(archivesDir, './phpMyAdmin-tmp/phpMyAdmin-5.0.2-all-languages'),
-      path.join(archivesDir, './phpMyAdmin')
+    // await decompress(buffer, path.join(archivesDir, './phpMyAdmin-tmp'))
+    // await fs.move(
+    //   path.join(archivesDir, './phpMyAdmin-tmp/phpMyAdmin-5.0.2-all-languages'),
+    //   path.join(archivesDir, './phpMyAdmin')
+    // )
+    await fs.copyFile(
+      path.join(appPath, './conf/config.default.php'),
+      path.join(archivesDir, './phpMyAdmin/libraries/config.default.php')
     )
 
-    this.log('解压完成...')
+    this.log('解压完成')
 
     const { phpMyAdmin } = this.state
     phpMyAdmin.status = 'finish'
@@ -244,6 +251,10 @@ export default class App extends Component {
     this.setState({
       PHP: phpMyAdmin
     })
+  }
+
+  complete = () => {
+    ipcRenderer.send('app-install-complete')
   }
 
   render () {
@@ -265,7 +276,7 @@ export default class App extends Component {
             <code>{logs.join('\n')}</code>
           </pre>
           <div className="app-footer">
-            <Button type="primary" loading={step !== 2}>
+            <Button type="primary" loading={step !== 2} onClick={this.complete}>
               {step !== 2 ? '安装中...' : '安装完成'}
             </Button>
           </div>

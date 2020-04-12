@@ -24,6 +24,10 @@ module.exports = {
       '@': resolve('src')
     }
   },
+  externals: {
+    got: 'commonjs2 got',
+    'fs-extra': 'commonjs2 fs-extra'
+  },
   module: {
     rules: [
       {
