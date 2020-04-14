@@ -4,12 +4,13 @@
   "description": "phpMyAdmin 的桌面版本",
   "main": "dist/main/app.js",
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
     "start": "electron .",
     "dev:main": "webpack --config build/main/webpack.config.dev.js",
     "dev:renderer": "webpack-dev-server --config build/renderer/webpack.config.dev.js",
     "build:main": "webpack --config build/main/webpack.config.prod.js",
     "build:renderer": "webpack --config build/renderer/webpack.config.prod.js",
-    "build": "electron-builder",
+    "build": "npm run build:main && npm run build:renderer",
     "release": "electron-builder",
     "lint": "eslint . --ext .js,.jsx --fix"
   },
