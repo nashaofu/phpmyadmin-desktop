@@ -1,10 +1,11 @@
 import os from 'os'
 import path from 'path'
 import fs from 'fs-extra'
+import which from 'which'
 import kill from 'tree-kill'
 import detect from 'detect-port'
 import { spawn } from 'child_process'
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 
 const userData = app.getPath('userData')
 const phpDir = path.join(userData, './archives/php')
@@ -40,7 +41,11 @@ export default class App {
       app.relaunch()
       app.exit()
     })
-    const pathExists = await Promise.all([fs.pathExists(phpDir), fs.pathExists(phpMyAdminDir)])
+    // mac使用内置的php
+    const pathExists = await Promise.all([
+      os.platform() === 'darwin' ? true : fs.pathExists(phpDir),
+      fs.pathExists(phpMyAdminDir)
+    ])
 
     // 有一个不存在就表示是第一次安装
     if (pathExists.some(pathExist => !pathExist)) {
@@ -75,7 +80,7 @@ export default class App {
 
     const url =
       process.env.NODE_ENV === 'development'
-        ? 'http://127.0.0.1:8080'
+        ? 'http://127.0.0.1:8080/install.html'
         : path.join(__dirname, '../renderer/install.html')
 
     this.installWin.loadURL(url)
@@ -104,15 +109,28 @@ export default class App {
     })
 
     this.port = await detect()
-    const exeFile = os.platform() === 'win32' ? 'php.exe' : 'php'
-    this.phpProcess = spawn(
-      path.join(phpDir, exeFile),
-      ['-S', `127.0.0.1:${this.port}`, '-t', phpMyAdminDir, '-c', path.join(phpDir, './php.ini')],
-      {
-        cwd: phpDir,
-        stdio: ['inherit', 'inherit', 'inherit']
-      }
-    )
+    const phpPath = {
+      win32: path.join(phpDir, 'php.exe'),
+      linux: path.join(phpDir, 'bin/php'),
+      darwin: 'php'
+    }
+
+    const exeFile = phpPath[os.platform()]
+    if (!exeFile) {
+      dialog.showErrorBox('不支持的系统', '软件不支持')
+      return app.quit()
+    }
+
+    const args = ['-S', `127.0.0.1:${this.port}`, '-t', phpMyAdminDir]
+
+    if (os.platform() !== 'darwin') {
+      args.push('-c', path.join(phpDir, './php.ini'))
+    }
+
+    this.phpProcess = spawn(exeFile, args, {
+      cwd: phpDir,
+      stdio: ['inherit', 'inherit', 'inherit']
+    })
 
     this.phpProcess.on('close', () => {
       this.phpProcess = null

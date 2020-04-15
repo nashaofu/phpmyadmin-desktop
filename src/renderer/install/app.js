@@ -66,7 +66,7 @@ export default class App extends Component {
       .catch(error => {
         const { PHP } = this.state
         PHP.status = 'error'
-        this.log(`PHP下载失败: ${error.toString()}`)
+        this.log(`安装失败: ${error.toString()}`)
         this.setState({
           PHP
         })
@@ -93,6 +93,19 @@ export default class App extends Component {
         }
       }
     })
+    if (os.platform() === 'darwin') {
+      this.log('使用系统自带PHP，跳过安装')
+      return this.setState({
+        PHP: {
+          status: 'finish',
+          progress: {
+            percent: 0,
+            transferred: undefined,
+            total: undefined
+          }
+        }
+      })
+    }
 
     const archive = isWin32 ? archives.phpWindows : archives.phpSource
     const userDataDir = remote.app.getPath('userData')
