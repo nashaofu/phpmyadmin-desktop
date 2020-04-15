@@ -1,9 +1,9 @@
 name: Release
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - master
 
 jobs:
   release:
@@ -23,15 +23,16 @@ jobs:
         with:
           node-version: 12.x
 
-      - name: Release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          # GitHub token, automatically provided to the action
-          # (No need to define this secret in the repo settings)
-          github_token: ${{ secrets.ACCESS_TOKEN }}
+      - name: Install Dependencies
+        run: yarn
 
-          # 执行electron-builder前执行的命令
-          build_script_name: build
-          # If the commit is tagged with a version (e.g. "v1.0.0"),
-          # release the app after building
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      - name: Build Main Process
+        run: yarn build:main
+
+      - name: Build Renderer Process
+        run: yarn build:renderer
+
+      - name: Build and Release Electron app
+        env:
+          - GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: yarn release

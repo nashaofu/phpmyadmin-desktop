@@ -10,7 +10,6 @@
     "dev:renderer": "webpack-dev-server --config build/renderer/webpack.config.dev.js",
     "build:main": "webpack --config build/main/webpack.config.prod.js",
     "build:renderer": "webpack --config build/renderer/webpack.config.prod.js",
-    "build": "npm run build:main && npm run build:renderer",
     "release": "electron-builder",
     "lint": "eslint . --ext .js,.jsx --fix"
   },
