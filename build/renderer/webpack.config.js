@@ -26,7 +26,10 @@ module.exports = {
   },
   externals: {
     got: 'commonjs2 got',
-    'fs-extra': 'commonjs2 fs-extra'
+    execa: 'commonjs2 execa',
+    'fs-extra': 'commonjs2 fs-extra',
+    decompress: 'commonjs2 decompress',
+    'sudo-prompt': 'commonjs2 sudo-prompt'
   },
   module: {
     rules: [

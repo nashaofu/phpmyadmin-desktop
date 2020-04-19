@@ -1,10 +1,9 @@
 import os from 'os'
 import path from 'path'
 import fs from 'fs-extra'
-import which from 'which'
+import execa from 'execa'
 import kill from 'tree-kill'
 import detect from 'detect-port'
-import { spawn } from 'child_process'
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 
 const userData = app.getPath('userData')
@@ -123,11 +122,11 @@ export default class App {
 
     const args = ['-S', `127.0.0.1:${this.port}`, '-t', phpMyAdminDir]
 
-    if (os.platform() !== 'darwin') {
+    if (os.platform() === 'win32') {
       args.push('-c', path.join(phpDir, './php.ini'))
     }
 
-    this.phpProcess = spawn(exeFile, args, {
+    this.phpProcess = execa(exeFile, args, {
       cwd: phpDir,
       stdio: ['inherit', 'inherit', 'inherit']
     })

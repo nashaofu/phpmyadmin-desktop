@@ -3,10 +3,11 @@ import got from 'got'
 import path from 'path'
 import fs from 'fs-extra'
 import crypto from 'crypto'
-import { remote, ipcRenderer } from 'electron'
+import sudo from 'sudo-prompt'
 import decompress from 'decompress'
 import React, { Component } from 'react'
 import { Steps, Divider, Button } from 'antd'
+import { remote, ipcRenderer } from 'electron'
 import { LoadingOutlined } from '@ant-design/icons'
 import archives from '@/common/archives'
 import './app.less'
@@ -153,18 +154,48 @@ export default class App extends Component {
     const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
+    const phpDir = path.join(archivesDir, './php')
 
     this.log(`正在解压文件${archiveName}...`)
 
-    await fs.remove(path.join(archivesDir, './php'))
+    await fs.remove(phpDir)
 
-    await decompress(buffer, path.join(archivesDir, './php'), {
-      strip: isWin32 ? 0 : 1
-    })
+    if (isWin32) {
+      await decompress(buffer, phpDir)
+      this.log('解压完成')
+      await fs.copyFile(path.join(appPath, './conf/php.ini'), path.join(phpDir, 'php.ini'))
+    } else {
+      const phpSourceDir = path.join(archivesDir, './php-source')
+      await fs.remove(phpSourceDir)
+      await decompress(buffer, phpSourceDir, {
+        strip: 1
+      })
+      this.log('解压完成')
+      this.log('正在编译安装PHP...')
+      await fs.copy(path.join(appPath, './conf/install/linux'), phpSourceDir)
+      const install = new Promise((resolve, reject) => {
+        process.chdir(phpSourceDir)
+        sudo.exec(
+          `./main.sh ${phpDir}`,
+          {
+            name: 'install'
+          },
+          (error, stdout, stderr) => {
+            stdout && this.log(stdout)
+            stderr && this.log(stderr)
+            if (error) {
+              reject(error)
+            } else {
+              resolve()
+            }
+          }
+        )
+      })
 
-    await fs.copyFile(path.join(appPath, './conf/php.ini'), path.join(archivesDir, './php/php.ini'))
+      await install
 
-    this.log('解压完成')
+      this.log('编译安装PHP成功')
+    }
 
     const { PHP } = this.state
     PHP.status = 'finish'
