@@ -52,8 +52,18 @@ export default class App extends Component {
     error: '安装失败'
   }
 
+  constructor () {
+    super()
+    this.logRef = React.createRef()
+  }
+
   componentDidMount () {
     this.run()
+  }
+
+  componentDidUpdate () {
+    const logRef = this.logRef.current
+    logRef.scrollTop = logRef.scrollHeight
   }
 
   run () {
@@ -143,40 +153,35 @@ export default class App extends Component {
       if (sha256 !== archive.sha256) {
         throw new Error('文件sha256不匹配')
       }
-      await fs.outputFile(path.join(archivesDir, path.basename(archive.url)), body)
+      await fs.outputFile(archivePath, body)
       this.log('下载成功')
     }
 
-    await this.installPHP(archiveName, body)
+    await this.installPHP(archivePath, body)
   }
 
-  async installPHP (archiveName, buffer) {
+  async installPHP (archivePath, buffer) {
     const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
     const phpDir = path.join(archivesDir, './php')
 
-    this.log(`正在解压文件${archiveName}...`)
-
     await fs.remove(phpDir)
 
     if (isWin32) {
+      this.log(`正在解压文件 ${archivePath}...`)
       await decompress(buffer, phpDir)
       this.log('解压完成')
       await fs.copyFile(path.join(appPath, './conf/php.ini'), path.join(phpDir, 'php.ini'))
     } else {
-      const phpSourceDir = path.join(archivesDir, './php-source')
-      await fs.remove(phpSourceDir)
-      await decompress(buffer, phpSourceDir, {
-        strip: 1
-      })
-      this.log('解压完成')
       this.log('正在编译安装PHP...')
-      await fs.copy(path.join(appPath, './conf/install/linux'), phpSourceDir)
+
+      await fs.copy(path.join(appPath, './conf/install/linux'), archivesDir)
+      const installScript = path.join(archivesDir, './main.sh')
+
       const install = new Promise((resolve, reject) => {
-        process.chdir(phpSourceDir)
         sudo.exec(
-          `./main.sh ${phpDir}`,
+          `chmod 755 ${installScript} && ${installScript} ${archivePath.slice(0, -7)} ${phpDir}`,
           {
             name: 'install'
           },
@@ -255,23 +260,24 @@ export default class App extends Component {
       if (sha256 !== archive.sha256) {
         throw new Error('文件sha256不匹配')
       }
-      await fs.outputFile(path.join(archivesDir, path.basename(archive.url)), body)
+      await fs.outputFile(archivePath, body)
       this.log('下载成功')
     }
 
-    await this.installPhpMyAdmin(archiveName, body)
+    await this.installPhpMyAdmin(archivePath, body)
   }
 
-  async installPhpMyAdmin (archiveName, buffer) {
+  async installPhpMyAdmin (archivePath, buffer) {
     const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
+    const phpMyAdminDir = path.join(archivesDir, './phpMyAdmin')
 
-    this.log(`正在解压文件${archiveName}...`)
+    this.log(`正在解压文件 ${archivePath}...`)
 
-    await fs.remove(path.join(archivesDir, './phpMyAdmin'))
+    await fs.remove(phpMyAdminDir)
 
-    await decompress(buffer, path.join(archivesDir, './phpMyAdmin'), {
+    await decompress(buffer, phpMyAdminDir, {
       strip: 1
     })
 
@@ -310,7 +316,7 @@ export default class App extends Component {
             {step === 0 && this.titles[PHP.status]}
             {step === 1 && this.titles[phpMyAdmin.status]}
           </Divider>
-          <pre className="app-log">
+          <pre ref={this.logRef} className="app-log">
             <code>{logs.join('\n')}</code>
           </pre>
           <div className="app-footer">

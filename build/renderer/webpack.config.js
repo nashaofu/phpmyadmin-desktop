@@ -1,6 +1,5 @@
 const path = require('path')
 const config = require('../config')
-const { ProgressPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 function resolve (dir) {
@@ -75,7 +74,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new ProgressPlugin(),
     ...Object.keys(config.renderer).map(key => {
       const template = config.renderer[key].template
       return new HtmlWebpackPlugin({

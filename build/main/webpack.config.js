@@ -1,6 +1,5 @@
 const path = require('path')
 const config = require('../config')
-const { ProgressPlugin } = require('webpack')
 const { dependencies } = require('../../package.json')
 
 function resolve (dir) {
@@ -54,6 +53,5 @@ module.exports = {
   node: {
     __dirname: false,
     __filename: false
-  },
-  plugins: [new ProgressPlugin()]
+  }
 }

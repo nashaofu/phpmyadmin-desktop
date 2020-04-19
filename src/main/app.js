@@ -47,7 +47,7 @@ export default class App {
     ])
 
     // 有一个不存在就表示是第一次安装
-    if (pathExists.some(pathExist => !pathExist)) {
+    if (!pathExists.some(pathExist => !pathExist)) {
       return this.showInstallWin()
     }
     this.showMainWin()

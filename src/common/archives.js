@@ -1,11 +1,11 @@
 export default {
   phpSource: {
-    url: 'https://www.php.net/distributions/php-7.4.4.tar.gz',
-    sha256: '1581b3e10c7854597e1086937d5753cdf92d132865c06a50aed4f4f407138616'
+    url: 'https://www.php.net/distributions/php-7.4.5.tar.gz',
+    sha256: '1ef619411b0bd68c0fbfd2a6c622ad6bc524d0bceb8476fb9807a23a0fe9a343'
   },
   phpWindows: {
-    url: 'https://windows.php.net/downloads/releases/php-7.4.4-Win32-vc15-x64.zip',
-    sha256: '2822fec309cb89f6775fbf2516497cdbaa91c9842f520e127c9e83cfa38c43e9'
+    url: 'https://windows.php.net/downloads/releases/php-7.4.5-Win32-vc15-x64.zip',
+    sha256: '89f699dae7c67b164ddb9094a1383324b48814a42bbd222c771c0ff474eabf1b'
   },
   phpMyAdmin: {
     url: 'https://files.phpmyadmin.net/phpMyAdmin/5.0.2/phpMyAdmin-5.0.2-all-languages.zip',

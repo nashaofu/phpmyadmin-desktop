@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 cur_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
+cd $cur_dir
+
 include(){
     local path=${1}
     if [ -s ${cur_dir}/${path}.sh ];then
@@ -36,7 +38,7 @@ fi
 # 安装编译工具
 install_tools
 
-install_php ${1}
+install_php ${1} ${2}
 
 echo
 echo "--------------------- Install Success ----------------------------"
