@@ -22,6 +22,7 @@ install_php(){
     cd $sourcedir
 
     error_detect "./configure ${php_configure_args}"
+    error_detect "make"
     error_detect "make install"
 
     # 清理文件
@@ -56,5 +57,21 @@ install_php_depends(){
             echo "There is no rpm package libc-client-devel or uw-imap-devel, please check it and try again."
         fi
         echo "Install dependencies packages for PHP completed..."
+    fi
+    install_libiconv
+}
+
+install_libiconv(){
+    if [ ! -e "/usr/local/bin/iconv" ]; then
+        cd $cur_dir
+        echo "libiconv install start..."
+        wget "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz"
+        tar zxf libiconv-1.16.tar.gz
+        cd libiconv-1.16
+
+        error_detect "./configure"
+        error_detect "make"
+        error_detect "make install"
+        echo "libiconv install completed..."
     fi
 }
