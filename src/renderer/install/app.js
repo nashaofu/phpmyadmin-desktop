@@ -181,7 +181,7 @@ export default class App extends Component {
 
       const install = new Promise((resolve, reject) => {
         sudo.exec(
-          `chmod 755 ${installScript} && ${installScript} ${archivePath.slice(0, -7)} ${phpDir}`,
+          `chmod 755 ${installScript} && ${installScript} ${archivePath} ${phpDir}`,
           {
             name: 'install'
           },

@@ -4,7 +4,7 @@ install_php(){
     local php_location=${2}
     local filename=$(basename $php_filename .tar.gz)
     local basedir=$(dirname $php_filename)
-    local sourcedir=$basedir/$fullname
+    local sourcedir=$basedir/$filename
 
     php_configure_args="--prefix=${php_location} \
     --with-config-file-path=${php_location}/etc \
@@ -18,8 +18,8 @@ install_php(){
     unset CPPFLAGS
     ldconfig
 
-    tar zvf $php_filename
-    cd sourcedir
+    tar zxf $php_filename
+    cd $sourcedir
 
     error_detect "./configure ${php_configure_args}"
     error_detect "make install"
