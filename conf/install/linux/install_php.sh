@@ -58,20 +58,4 @@ install_php_depends(){
         fi
         echo "Install dependencies packages for PHP completed..."
     fi
-    install_libiconv
-}
-
-install_libiconv(){
-    if [ ! -e "/usr/local/bin/iconv" ]; then
-        cd $cur_dir
-        echo "libiconv install start..."
-        wget "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz"
-        tar zxf libiconv-1.16.tar.gz
-        cd libiconv-1.16
-
-        error_detect "./configure"
-        error_detect "make"
-        error_detect "make install"
-        echo "libiconv install completed..."
-    fi
 }
