@@ -19,13 +19,13 @@ install_tools(){
     echo "Starting to install development tools..."
     if check_sys packageManager apt; then
         apt-get -y update > /dev/null 2>&1
-        apt_tools=(gcc g++ make)
+        apt_tools=(build-essential gcc g++ make wget)
         for tool in ${apt_tools[@]}; do
             error_detect_depends "apt-get -y install ${tool}"
         done
     elif check_sys packageManager yum; then
         yum makecache > /dev/null 2>&1
-        yum_tools=(yum-utils gcc gcc-c++ make)
+        yum_tools=(yum-utils gcc gcc-c++ make kernel-devel wget)
         for tool in ${yum_tools[@]}; do
             error_detect_depends "yum -y install ${tool}"
         done
