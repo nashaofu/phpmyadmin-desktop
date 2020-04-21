@@ -187,7 +187,6 @@ export default class App extends Component {
           },
           (error, stdout, stderr) => {
             stdout && this.log(stdout)
-            stderr && this.log(stderr)
             if (error) {
               reject(error)
             } else {

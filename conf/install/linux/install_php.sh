@@ -97,10 +97,14 @@ install_libiconv(){
     if [ ! -e "/usr/local/bin/iconv" ]; then
         cd ${cur_dir}
         echo "libiconv install start..."
+
+        rm "libiconv-1.16.tar.gz"
+        rm -rf "libiconv-1.16"
+
         download_file "libiconv-1.16.tar.gz" "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz"
 
-        tar -xf libiconv-1.16.tar.gz
-        cd libiconv-1.16
+        tar -xf "libiconv-1.16.tar.gz"
+        cd "libiconv-1.16"
 
         error_detect "./configure"
         error_detect "parallel_make"
@@ -113,13 +117,19 @@ install_re2c(){
     if [ ! -e "/usr/local/bin/re2c" ]; then
         cd ${cur_dir}
         echo "re2c install start..."
+
+        rm "re2c-1.3.tar.xz"
+        rm -rf "re2c-1.3"
+
         download_file "re2c-1.3.tar.xz" "https://github.com/skvadrik/re2c/releases/download/1.3/re2c-1.3.tar.xz"
-        tar -xf re2c-1.3.tar.xz
-        cd re2c-1.3
+
+        tar -xf "re2c-1.3.tar.xz"
+        cd "re2c-1.3"
 
         error_detect "./configure"
         error_detect "make"
         error_detect "make install"
+
         echo "re2c install completed..."
     fi
 }
@@ -128,9 +138,14 @@ install_oniguruma(){
   if [! -e "/usr/local/bin/onig-config"]; then
       cd ${cur_dir}
       echo "oniguruma install start..."
+
+      rm "onig-6.9.5.tar.gz"
+      rm -rf "onig-6.9.5"
+
       download_file "onig-6.9.5.tar.gz" "https://github.com/kkos/oniguruma/releases/download/v6.9.5/onig-6.9.5.tar.gz"
-      tar -xf onig-6.9.5.tar.gz
-      cd onig-6.9.5
+
+      tar -xf "onig-6.9.5.tar.gz"
+      cd "onig-6.9.5"
 
       error_detect "./configure"
       error_detect "make"
