@@ -24,6 +24,7 @@ include "get_os_info"
 include "check_os"
 include "error_detect"
 include "install_tools"
+include "install_php_depends"
 include "install_php"
 
 get_os_info
@@ -37,6 +38,13 @@ fi
 
 # 安装编译工具
 install_tools
+
+# Install PHP depends
+install_php_depends
+
+unset LD_LIBRARY_PATH
+unset CPPFLAGS
+ldconfig
 
 install_php ${1} ${2}
 

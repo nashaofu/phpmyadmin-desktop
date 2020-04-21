@@ -12,7 +12,6 @@ get_os_info(){
     kern=$( uname -r )
     host=$( hostname )
 
-    clear
     echo
     echo "--------------------- System Information ----------------------------"
     echo
