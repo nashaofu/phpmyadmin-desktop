@@ -143,6 +143,7 @@ export default class App {
     }
 
     this.phpProcess = spawn(phpPath, args, {
+      cwd: os.platform() === 'darwin' ? process.cwd() : phpDir,
       stdio: ['inherit', 'inherit', 'inherit']
     })
 
