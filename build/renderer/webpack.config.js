@@ -25,10 +25,14 @@ module.exports = {
   },
   externals: {
     got: 'commonjs2 got',
+    which: 'commonjs2 which',
     execa: 'commonjs2 execa',
     'fs-extra': 'commonjs2 fs-extra',
     decompress: 'commonjs2 decompress',
-    'sudo-prompt': 'commonjs2 sudo-prompt'
+    'tree-kill': 'commonjs2 tree-kill',
+    'sudo-prompt': 'commonjs2 sudo-prompt',
+    'cross-spawn': 'commonjs2 cross-spawn',
+    'detect-port': 'commonjs2 detect-port'
   },
   module: {
     rules: [

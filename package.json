@@ -11,6 +11,7 @@
     "build:main": "webpack --config build/main/webpack.config.prod.js --progress",
     "build:renderer": "webpack --config build/renderer/webpack.config.prod.js --progress",
     "release": "electron-builder",
+    "re": "electron-builder",
     "lint": "eslint . --ext .js,.jsx --fix"
   },
   "repository": {
@@ -30,6 +31,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.0.6",
     "antd": "^4.1.2",
+    "cross-spawn": "^7.0.2",
     "decompress": "^4.2.1",
     "detect-port": "^1.3.0",
     "execa": "^4.0.0",
@@ -39,7 +41,8 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "sudo-prompt": "^9.1.1",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "which": "^2.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

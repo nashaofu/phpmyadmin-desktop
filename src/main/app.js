@@ -1,8 +1,10 @@
 import os from 'os'
+import got from 'got'
 import path from 'path'
 import fs from 'fs-extra'
-import execa from 'execa'
+import which from 'which'
 import kill from 'tree-kill'
+import spawn from 'cross-spawn'
 import detect from 'detect-port'
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 
@@ -16,7 +18,15 @@ export default class App {
   installWin = null
   mainWin = null
   constructor () {
-    this.init()
+    this.init().catch(err => {
+      dialog
+        .showMessageBox({
+          title: '错误',
+          buttons: ['确定'],
+          message: `软件报错：${err}`
+        })
+        .then(() => app.exit(1))
+    })
   }
 
   async init () {
@@ -50,7 +60,7 @@ export default class App {
     if (pathExists.some(pathExist => !pathExist)) {
       return this.showInstallWin()
     }
-    this.showMainWin()
+    return this.showMainWin()
   }
 
   async showInstallWin () {
@@ -107,37 +117,49 @@ export default class App {
       this.mainWin.show()
     })
 
-    this.port = await detect()
-    const phpPath = {
-      win32: path.join(phpDir, 'php.exe'),
-      linux: path.join(phpDir, 'bin/php'),
-      darwin: 'php'
+    if (typeof this.port !== 'number' || !this.phpProcess) {
+      this.port = await this.startPHPProcess()
     }
 
-    const exeFile = phpPath[os.platform()]
-    if (!exeFile) {
-      dialog.showErrorBox('不支持的系统', '软件不支持')
-      return app.quit()
+    this.mainWin.loadURL(`http://127.0.0.1:${this.port}`)
+  }
+
+  async startPHPProcess () {
+    let phpPath
+    if (os.platform() === 'win32') {
+      phpPath = path.join(phpDir, 'php.exe')
+    } else if (os.platform() === 'linux') {
+      phpPath = path.join(phpDir, 'bin/php')
+    } else {
+      phpPath = await which('php')
     }
 
-    const args = ['-S', `127.0.0.1:${this.port}`, '-t', phpMyAdminDir]
+    const port = await detect()
+
+    const args = ['-S', `127.0.0.1:${port}`, '-t', phpMyAdminDir]
 
     if (os.platform() === 'win32') {
       args.push('-c', path.join(phpDir, './php.ini'))
     }
 
-    this.phpProcess = execa(exeFile, args, {
-      cwd: phpDir,
+    this.phpProcess = spawn(phpPath, args, {
       stdio: ['inherit', 'inherit', 'inherit']
     })
 
-    this.phpProcess.on('close', () => {
+    this.phpProcess.on('close', code => {
       this.phpProcess = null
     })
 
-    // 加载远程URL
-    const url = `http://127.0.0.1:${this.port}`
-    console.log('url为：', url)
-    this.mainWin.loadURL(url)
+    await got.get(`http://127.0.0.1:${port}`, {
+      timeout: 3000,
+      retry: {
+        calculateDelay: ({ attemptCount }) => {
+          // 重试12次，每次间隔500ms
+          return attemptCount <= 12 ? 500 : 0
+        }
+      }
+    })
+
+    return port
   }
 }
