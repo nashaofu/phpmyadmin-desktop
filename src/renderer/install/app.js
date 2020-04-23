@@ -251,7 +251,7 @@ export default class App extends Component {
         progress.percent = `${(progress.percent * 100).toFixed(2)}%`
         phpMyAdmin.progress = progress
         this.setState({
-          PHP: phpMyAdmin
+          phpMyAdmin
         })
         this.log(`total: ${progress.total} transferred: ${progress.transferred} percent: ${progress.percent}`)
       })
