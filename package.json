@@ -10,8 +10,8 @@
     "dev:renderer": "webpack-dev-server --config build/renderer/webpack.config.dev.js --progress",
     "build:main": "webpack --config build/main/webpack.config.prod.js --progress",
     "build:renderer": "webpack --config build/renderer/webpack.config.prod.js --progress",
+    "pack": "electron-builder -mwl",
     "release": "electron-builder",
-    "re": "electron-builder",
     "lint": "eslint . --ext .js,.jsx --fix"
   },
   "repository": {
