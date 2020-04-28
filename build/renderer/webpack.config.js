@@ -1,6 +1,5 @@
 const path = require('path')
 const config = require('../config')
-const { ProgressPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 function resolve (dir) {
@@ -26,7 +25,14 @@ module.exports = {
   },
   externals: {
     got: 'commonjs2 got',
-    'fs-extra': 'commonjs2 fs-extra'
+    which: 'commonjs2 which',
+    execa: 'commonjs2 execa',
+    'fs-extra': 'commonjs2 fs-extra',
+    decompress: 'commonjs2 decompress',
+    'tree-kill': 'commonjs2 tree-kill',
+    'sudo-prompt': 'commonjs2 sudo-prompt',
+    'cross-spawn': 'commonjs2 cross-spawn',
+    'detect-port': 'commonjs2 detect-port'
   },
   module: {
     rules: [
@@ -72,7 +78,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new ProgressPlugin(),
     ...Object.keys(config.renderer).map(key => {
       const template = config.renderer[key].template
       return new HtmlWebpackPlugin({

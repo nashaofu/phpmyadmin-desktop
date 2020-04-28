@@ -10,10 +10,6 @@ module.exports = {
   distDir,
   main: path.resolve(srcDir, 'main/index.js'),
   renderer: {
-    app: {
-      entry: path.resolve(srcDir, 'renderer/app/index.js'),
-      template: path.resolve(srcDir, 'renderer/app/index.html')
-    },
     install: {
       entry: path.resolve(srcDir, 'renderer/install/index.js'),
       template: path.resolve(srcDir, 'renderer/install/index.html')

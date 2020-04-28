@@ -3,10 +3,11 @@ import got from 'got'
 import path from 'path'
 import fs from 'fs-extra'
 import crypto from 'crypto'
-import { remote, ipcRenderer } from 'electron'
+import sudo from 'sudo-prompt'
 import decompress from 'decompress'
 import React, { Component } from 'react'
 import { Steps, Divider, Button } from 'antd'
+import { remote, ipcRenderer } from 'electron'
 import { LoadingOutlined } from '@ant-design/icons'
 import archives from '@/common/archives'
 import './app.less'
@@ -51,8 +52,18 @@ export default class App extends Component {
     error: '安装失败'
   }
 
+  constructor () {
+    super()
+    this.logRef = React.createRef()
+  }
+
   componentDidMount () {
     this.run()
+  }
+
+  componentDidUpdate () {
+    const logRef = this.logRef.current
+    logRef.scrollTop = logRef.scrollHeight
   }
 
   run () {
@@ -66,7 +77,7 @@ export default class App extends Component {
       .catch(error => {
         const { PHP } = this.state
         PHP.status = 'error'
-        this.log(`PHP下载失败: ${error.toString()}`)
+        this.log(`安装失败: ${error.toString()}`)
         this.setState({
           PHP
         })
@@ -93,6 +104,19 @@ export default class App extends Component {
         }
       }
     })
+    if (os.platform() === 'darwin') {
+      this.log('使用系统自带PHP，跳过安装')
+      return this.setState({
+        PHP: {
+          status: 'finish',
+          progress: {
+            percent: 0,
+            transferred: undefined,
+            total: undefined
+          }
+        }
+      })
+    }
 
     const archive = isWin32 ? archives.phpWindows : archives.phpSource
     const userDataDir = remote.app.getPath('userData')
@@ -129,29 +153,53 @@ export default class App extends Component {
       if (sha256 !== archive.sha256) {
         throw new Error('文件sha256不匹配')
       }
-      await fs.outputFile(path.join(archivesDir, path.basename(archive.url)), body)
+      await fs.outputFile(archivePath, body)
       this.log('下载成功')
     }
 
-    await this.installPHP(archiveName, body)
+    await this.installPHP(archivePath, body)
   }
 
-  async installPHP (archiveName, buffer) {
+  async installPHP (archivePath, buffer) {
     const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
+    const phpDir = path.join(archivesDir, './php')
 
-    this.log(`正在解压文件${archiveName}...`)
+    await fs.remove(phpDir)
 
-    await fs.remove(path.join(archivesDir, './php'))
+    if (isWin32) {
+      this.log(`正在解压文件 ${archivePath}...`)
+      await decompress(buffer, phpDir)
+      this.log('解压完成')
+      await fs.copyFile(path.join(appPath, './conf/php.ini'), path.join(phpDir, 'php.ini'))
+    } else {
+      this.log('正在编译安装PHP...')
 
-    await decompress(buffer, path.join(archivesDir, './php'), {
-      strip: isWin32 ? 0 : 1
-    })
+      await fs.copy(path.join(appPath, './conf/install/linux'), archivesDir)
+      const installScript = path.join(archivesDir, './main.sh')
 
-    await fs.copyFile(path.join(appPath, './conf/php.ini'), path.join(archivesDir, './php/php.ini'))
+      const install = new Promise((resolve, reject) => {
+        sudo.exec(
+          `chmod 755 ${installScript} && ${installScript} ${archivePath} ${phpDir}`,
+          {
+            name: 'install'
+          },
+          (error, stdout, stderr) => {
+            stdout && this.log(stdout)
+            if (error) {
+              reject(error)
+            } else {
+              resolve()
+            }
+          }
+        )
+      })
 
-    this.log('解压完成')
+      await install
+
+      this.log('编译安装PHP成功')
+    }
 
     const { PHP } = this.state
     PHP.status = 'finish'
@@ -203,7 +251,7 @@ export default class App extends Component {
         progress.percent = `${(progress.percent * 100).toFixed(2)}%`
         phpMyAdmin.progress = progress
         this.setState({
-          PHP: phpMyAdmin
+          phpMyAdmin
         })
         this.log(`total: ${progress.total} transferred: ${progress.transferred} percent: ${progress.percent}`)
       })
@@ -211,23 +259,24 @@ export default class App extends Component {
       if (sha256 !== archive.sha256) {
         throw new Error('文件sha256不匹配')
       }
-      await fs.outputFile(path.join(archivesDir, path.basename(archive.url)), body)
+      await fs.outputFile(archivePath, body)
       this.log('下载成功')
     }
 
-    await this.installPhpMyAdmin(archiveName, body)
+    await this.installPhpMyAdmin(archivePath, body)
   }
 
-  async installPhpMyAdmin (archiveName, buffer) {
+  async installPhpMyAdmin (archivePath, buffer) {
     const appPath = remote.app.getAppPath()
     const userDataDir = remote.app.getPath('userData')
     const archivesDir = path.join(userDataDir, './archives')
+    const phpMyAdminDir = path.join(archivesDir, './phpMyAdmin')
 
-    this.log(`正在解压文件${archiveName}...`)
+    this.log(`正在解压文件 ${archivePath}...`)
 
-    await fs.remove(path.join(archivesDir, './phpMyAdmin'))
+    await fs.remove(phpMyAdminDir)
 
-    await decompress(buffer, path.join(archivesDir, './phpMyAdmin'), {
+    await decompress(buffer, phpMyAdminDir, {
       strip: 1
     })
 
@@ -266,7 +315,7 @@ export default class App extends Component {
             {step === 0 && this.titles[PHP.status]}
             {step === 1 && this.titles[phpMyAdmin.status]}
           </Divider>
-          <pre className="app-log">
+          <pre ref={this.logRef} className="app-log">
             <code>{logs.join('\n')}</code>
           </pre>
           <div className="app-footer">

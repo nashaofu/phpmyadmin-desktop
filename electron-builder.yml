@@ -13,14 +13,17 @@ publish:
   owner: nashaofu
 mac:
   target: dmg
-  category: public.app-category.instant-messaging
+  icon: ./icons/pma.png
+  category: public.app-category.developer-tools
 win:
+  icon: ./icons/pma.png
   target:
     - target: nsis
       arch:
         - x64
         - ia32
 linux:
+  icon: ./icons/pma.png
   target:
     - target: AppImage
       arch:
@@ -41,7 +44,7 @@ linux:
         - arm64
         - armv7l
   executableName: phpMyAdmin
-  category: InstantMessaging;Network
+  category: Database;Development
 nsis:
   oneClick: false
   perMachine: true
